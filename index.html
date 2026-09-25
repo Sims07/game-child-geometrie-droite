@@ -3,335 +3,190 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Géométrie CE2 - Les Droites & Point Alignés</title>
+  <title>Géométrie CE2 - Les Droites</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Fredoka', cursive, sans-serif;
-    }
+    body { touch-action: manipulation; }
     .canvas-container { position: relative; touch-action: none; }
     .rule {
       position: absolute;
-      height: 32px;
-      background: rgba(254, 240, 138, 0.85);
-      border: 2px solid #ca8a04;
-      border-radius: 6px;
+      height: 28px;
+      background: rgba(251, 191, 36, 0.85);
+      border: 2px solid #d97706;
+      border-radius: 4px;
       transform-origin: center center;
       cursor: move;
       pointer-events: auto;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(2px);
-      transition: transform 0.1s ease-out;
-    }
-    
-    /* Animation pulse pour la droite révélée */
-    @keyframes lineGlow {
-      0% { stroke-dashoffset: 1000; opacity: 0.3; }
-      50% { opacity: 1; }
-      100% { stroke-dashoffset: 0; opacity: 1; }
-    }
-    .revealed-line {
-      stroke-dasharray: 1000;
-      animation: lineGlow 1.2s forwards ease-in-out;
-    }
-
-    /* Styles dédiés à l'impression du diplôme */
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      #diploma-modal, #diploma-modal * {
-        visibility: visible;
-      }
-      #diploma-modal {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background: white !important;
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-      }
-      .no-print {
-        display: none !important;
-      }
-      .diploma-card {
-        border: 12px double #4f46e5 !important;
-        box-shadow: none !important;
-        width: 90% !important;
-        margin: 0 auto !important;
-      }
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     }
   </style>
 </head>
-<body class="bg-amber-50 min-h-screen text-slate-800 pb-12 select-none">
+<body class="bg-amber-50 h-screen w-screen overflow-hidden font-sans text-slate-800 flex flex-col">
 
-  <div class="max-w-4xl mx-auto p-4">
-    <!-- Header -->
-    <header class="text-center my-6">
-      <div class="inline-block bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-sm font-bold mb-2 shadow-sm">
-        🎓 Programme de Mathématiques CE2
-      </div>
-      <h1 class="text-4xl font-extrabold text-indigo-600 mb-2 tracking-wide">📐 Le Monde des Droites</h1>
-      <p class="text-slate-600 text-lg">Apprends à reconnaître les droites et trouve les points alignés !</p>
-    </header>
-
-    <!-- Navigation Onglets -->
-    <div class="flex justify-center gap-3 mb-8">
-      <button id="tab1-btn" onclick="switchTab(1)" class="px-6 py-3 rounded-2xl font-bold bg-indigo-600 text-white shadow-lg transition transform hover:-translate-y-0.5">
-        Jeu 1 : Est-ce une droite ? 📏
+  <!-- Header compact -->
+  <header class="bg-white border-b border-amber-200 px-4 py-2 flex items-center justify-between shrink-0 shadow-sm">
+    <div class="flex items-center gap-2">
+      <span class="bg-amber-500 text-white text-xs font-black px-2 py-0.5 rounded-md">CE2</span>
+      <h1 class="text-base font-extrabold text-amber-900">Géométrie Facile</h1>
+    </div>
+    <div class="flex gap-2">
+      <button id="tab1-btn" onclick="switchTab(1)" class="px-3 py-1 rounded-lg font-bold text-xs bg-indigo-600 text-white shadow">
+        Jeu 1 : Droites
       </button>
-      <button id="tab2-btn" onclick="switchTab(2)" class="px-6 py-3 rounded-2xl font-bold bg-white text-slate-700 hover:bg-slate-100 shadow transition transform hover:-translate-y-0.5">
+      <button id="tab2-btn" onclick="switchTab(2)" class="px-3 py-1 rounded-lg font-bold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200">
         Jeu 2 : Points alignés 🎯
       </button>
     </div>
+  </header>
+
+  <!-- Zone Principale -->
+  <main class="flex-1 p-2 flex flex-col min-h-0">
 
     <!-- JEU 1 : Droite ou pas ? -->
-    <section id="game1" class="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border-4 border-indigo-100">
-      
-      <!-- Barre de score Jeu 1 -->
-      <div class="flex justify-between items-center mb-6 pb-4 border-b-2 border-slate-100">
-        <div class="bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-full text-sm font-bold">
-          Question <span id="q1-num" class="text-lg">1</span> / 5
-        </div>
-        <div class="bg-emerald-50 text-emerald-700 px-4 py-1.5 rounded-full text-sm font-bold">
-          Score : <span id="g1-score" class="text-lg">0</span> / 5 ⭐
-        </div>
+    <section id="game1" class="bg-white rounded-xl shadow-md border border-amber-100 p-3 flex-1 flex flex-col justify-between min-h-0">
+      <div class="flex justify-between items-center text-xs font-bold text-slate-500">
+        <span class="bg-indigo-50 text-indigo-600 px-2.5 py-0.5 rounded-full border border-indigo-100">
+          Étape <span id="q1-num">1</span> / 5
+        </span>
+        <span class="bg-emerald-50 text-emerald-600 px-2.5 py-0.5 rounded-full border border-emerald-100">
+          Score : <span id="q1-score">0</span> / 5
+        </span>
       </div>
 
-      <!-- Écran de jeu 1 -->
-      <div id="g1-play-zone" class="space-y-6 text-center">
-        <h2 class="text-2xl font-bold text-slate-800">Observe bien la figure : Est-ce une droite ?</h2>
-        
-        <!-- Zone SVG d'affichage de la forme -->
-        <div class="w-full h-56 bg-slate-50 border-2 border-indigo-200 rounded-2xl flex items-center justify-center p-4 shadow-inner relative overflow-hidden">
-          <svg id="q1-svg" class="w-full h-full" viewBox="0 0 400 150"></svg>
-        </div>
-
-        <!-- Boutons de Réponse -->
-        <div id="q1-buttons" class="flex justify-center gap-6 pt-2">
-          <button onclick="checkGame1(true)" class="px-10 py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-xl font-bold rounded-2xl shadow-lg transition transform active:scale-95 hover:-translate-y-1 flex items-center gap-2">
-            <span>✅</span> Oui, c'est une droite
-          </button>
-          <button onclick="checkGame1(false)" class="px-10 py-4 bg-rose-500 hover:bg-rose-600 text-white text-xl font-bold rounded-2xl shadow-lg transition transform active:scale-95 hover:-translate-y-1 flex items-center gap-2">
-            <span>❌</span> Non, ce n'en est pas une
-          </button>
-        </div>
-
-        <div id="q1-feedback" class="h-12 font-bold text-xl flex items-center justify-center"></div>
+      <div class="text-center my-1">
+        <h2 class="text-base font-extrabold text-slate-800">Est-ce une droite ?</h2>
+        <p class="text-xs text-slate-500">Rappel : une droite ne s'arrête jamais et n'a pas de crochets !</p>
       </div>
 
-      <!-- Écran de fin du Jeu 1 -->
-      <div id="g1-end-zone" class="hidden text-center py-8 space-y-5">
-        <div class="text-5xl">🎉</div>
-        <h2 class="text-3xl font-extrabold text-indigo-600">Jeu 1 Terminé !</h2>
-        <p class="text-2xl font-bold text-slate-700">Ton score : <span id="g1-final-score" class="text-emerald-600">0</span> / 5</p>
-        <p id="g1-comment" class="text-lg text-slate-600 italic"></p>
-        <div class="flex justify-center gap-4 pt-4">
-          <button onclick="resetGame1()" class="px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-lg rounded-2xl shadow transition">
-            Rejouer le Jeu 1 🔄
-          </button>
-          <button onclick="switchTab(2)" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-2xl shadow-lg transition transform hover:-translate-y-0.5">
-            Passer au Jeu 2 ➡️
-          </button>
-        </div>
+      <!-- Canvas SVG d'affichage de la figure -->
+      <div class="flex-1 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center relative min-h-0 my-1 overflow-hidden">
+        <svg id="q1-svg" class="w-full h-full max-h-56" viewBox="0 0 400 160"></svg>
       </div>
 
+      <div class="flex justify-center gap-4 py-1">
+        <button onclick="checkGame1(true)" class="flex-1 max-w-xs py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold rounded-lg shadow text-sm transition active:scale-95">
+          Oui, c'est une droite ✅
+        </button>
+        <button onclick="checkGame1(false)" class="flex-1 max-w-xs py-2 bg-rose-500 hover:bg-rose-600 text-white font-extrabold rounded-lg shadow text-sm transition active:scale-95">
+          Non, ce n'est pas une droite ❌
+        </button>
+      </div>
+
+      <div id="q1-feedback" class="h-6 text-center font-bold text-xs flex items-center justify-center"></div>
     </section>
 
-    <!-- JEU 2 : Nuage de points avec Règle et Ligne de solution -->
-    <section id="game2" class="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border-4 border-indigo-100 hidden">
-      
-      <!-- Barre de score Jeu 2 -->
-      <div class="flex justify-between items-center mb-4 pb-3 border-b-2 border-slate-100">
-        <div class="bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-full text-sm font-bold">
-          Niveau : <span id="g2-level" class="text-lg">1</span> / 5
-        </div>
-        <div class="bg-emerald-50 text-emerald-700 px-4 py-1.5 rounded-full text-sm font-bold">
-          Score : <span id="g2-score" class="text-lg">0</span> / 5 ⭐
-        </div>
+    <!-- JEU 2 : Points alignés -->
+    <section id="game2" class="bg-white rounded-xl shadow-md border border-amber-100 p-3 flex-1 flex flex-col justify-between min-h-0 hidden">
+      <div class="flex justify-between items-center text-xs font-bold text-slate-500">
+        <span class="bg-indigo-50 text-indigo-600 px-2.5 py-0.5 rounded-full border border-indigo-100">
+          Étape <span id="g2-level">1</span> / 5
+        </span>
+        <span class="bg-emerald-50 text-emerald-600 px-2.5 py-0.5 rounded-full border border-emerald-100">
+          Score : <span id="g2-score">0</span> / 5 ⭐
+        </span>
       </div>
 
-      <!-- Écran de jeu 2 -->
-      <div id="g2-play-zone">
-        <div class="text-center mb-4">
-          <h2 class="text-2xl font-bold text-slate-800 mb-1">Trouve les 3 points alignés !</h2>
-          <p class="text-sm text-slate-600">Déplace la règle, ajuste son angle, puis clique sur 3 points pour les sélectionner.</p>
+      <div id="g2-play-zone" class="flex-1 flex flex-col justify-between min-h-0">
+        <div class="text-center my-1">
+          <h2 class="text-base font-extrabold text-slate-800">Clique sur les 3 points alignés !</h2>
+          <p class="text-xs text-slate-500">Aide-toi de la règle pour vérifier.</p>
         </div>
 
-        <!-- Zone de dessin interactive avec Canvas / SVG -->
-        <div class="canvas-container w-full h-80 bg-slate-50 border-2 border-indigo-200 rounded-2xl relative overflow-hidden shadow-inner" id="canvas-area">
-          <!-- Canevas SVG pour les points et la ligne révélée -->
-          <svg id="q2-svg" class="w-full h-full absolute top-0 left-0 z-0"></svg>
+        <!-- Zone du Canvas -->
+        <div class="canvas-container flex-1 bg-slate-50 border border-slate-200 rounded-lg relative overflow-hidden my-1 min-h-0" id="canvas-area">
+          <svg id="q2-svg" class="w-full h-full absolute top-0 left-0" viewBox="0 0 360 200" preserveAspectRatio="xMidYMid meet"></svg>
           
-          <!-- Règle mobile transparente -->
-          <div id="ruler" class="rule w-80 flex items-center justify-between px-3 text-xs font-mono text-amber-900 select-none z-10" style="top: 120px; left: 60px; transform: rotate(0deg);">
-            <div class="flex w-full justify-between opacity-70 border-b border-amber-800 pb-1">
-              <span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span>
-            </div>
+          <!-- Règle mobile -->
+          <div id="ruler" class="rule w-56 flex items-center justify-between px-2 text-[10px] font-mono text-amber-950 select-none" style="top: 140px; left: 20px; transform: rotate(0deg);">
+            <span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span><span>|</span>
           </div>
         </div>
 
-        <!-- Contrôles de précision de la Règle -->
-        <div class="flex flex-wrap justify-center items-center gap-2 mt-4 bg-amber-50/60 p-3 rounded-2xl border border-amber-200">
-          <span class="text-xs font-bold text-amber-800 uppercase mr-1">Rotation règle :</span>
-          <button onclick="rotateRuler(-15)" class="px-3 py-1.5 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-xl text-sm font-bold shadow-sm active:scale-95">-15°</button>
-          <button onclick="rotateRuler(-5)" class="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-sm font-bold shadow-sm active:scale-95">-5°</button>
-          <button onclick="rotateRuler(5)" class="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-sm font-bold shadow-sm active:scale-95">+5°</button>
-          <button onclick="rotateRuler(15)" class="px-3 py-1.5 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-xl text-sm font-bold shadow-sm active:scale-95">+15°</button>
-          <button onclick="resetRuler()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold shadow-sm ml-2">Réinitialiser 🎯</button>
+        <!-- Contrôles Règle -->
+        <div class="flex justify-center items-center gap-1 my-1 bg-slate-100 p-1 rounded-lg">
+          <span class="text-[11px] font-bold text-slate-600 mr-1">Règle :</span>
+          <button onclick="rotateRuler(-15)" class="px-2 py-1 bg-white hover:bg-slate-200 text-slate-700 rounded text-xs font-bold shadow-sm">-15°</button>
+          <button onclick="rotateRuler(-3)" class="px-2 py-1 bg-white hover:bg-slate-200 text-slate-700 rounded text-xs font-bold shadow-sm">-3°</button>
+          <button onclick="resetRulerRotation()" class="px-2 py-1 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded text-xs font-bold shadow-sm">0°</button>
+          <button onclick="rotateRuler(3)" class="px-2 py-1 bg-white hover:bg-slate-200 text-slate-700 rounded text-xs font-bold shadow-sm">+3°</button>
+          <button onclick="rotateRuler(15)" class="px-2 py-1 bg-white hover:bg-slate-200 text-slate-700 rounded text-xs font-bold shadow-sm">+15°</button>
         </div>
 
         <!-- Validation -->
-        <div class="mt-5 text-center space-y-3">
-          <p class="text-md font-bold text-slate-700">Points sélectionnés : <span id="selected-points" class="text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-200">Aucun</span></p>
-          <div class="flex justify-center gap-3">
-            <button id="btn-check-g2" onclick="checkGame2()" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-2xl shadow-lg transition transform active:scale-95 hover:-translate-y-0.5">
-              🔍 Vérifier l'alignement
-            </button>
+        <div class="text-center">
+          <div class="text-xs font-bold mb-1">
+            Sélection : <span id="selected-points" class="text-indigo-600">Aucun</span>
           </div>
-          <div id="q2-feedback" class="h-10 font-bold text-xl flex items-center justify-center"></div>
+          <button id="btn-validate" onclick="checkGame2()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold rounded-lg shadow transition">
+            Vérifier l'alignement
+          </button>
+          <div id="q2-feedback" class="h-6 text-center font-bold text-xs flex items-center justify-center mt-1"></div>
         </div>
       </div>
 
-      <!-- Écran de Fin de Partie du Jeu 2 -->
-      <div id="g2-end-zone" class="hidden text-center py-8 space-y-5">
-        <div class="text-5xl">🏆</div>
-        <h2 class="text-3xl font-extrabold text-indigo-600">Jeu 2 Terminé !</h2>
-        <p class="text-2xl font-bold text-slate-700">Score aux points alignés : <span id="g2-final-score" class="text-emerald-600">0</span> / 5</p>
-        
-        <div class="bg-indigo-50 p-6 rounded-2xl max-w-md mx-auto border border-indigo-200 space-y-2">
-          <h3 class="font-bold text-indigo-900 text-lg">Bilan Global :</h3>
-          <p class="text-slate-700 font-semibold">Score Total : <span id="total-score" class="text-xl font-extrabold text-indigo-600">0</span> / 10</p>
-          <div id="total-stars" class="text-3xl">⭐⭐⭐</div>
-        </div>
-
-        <div class="flex flex-wrap justify-center gap-4 pt-4">
-          <button onclick="resetGame2()" class="px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-lg rounded-2xl shadow transition">
-            Rejouer le Jeu 2 🔄
-          </button>
-          <button onclick="openDiplomaModal()" class="px-8 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-lg rounded-2xl shadow-lg transition transform hover:-translate-y-0.5 flex items-center gap-2">
-            🎓 Obtenir mon Diplôme !
-          </button>
-        </div>
+      <!-- Écran de Fin -->
+      <div id="g2-end-zone" class="hidden text-center py-6 space-y-3 my-auto">
+        <h2 class="text-2xl font-black text-indigo-600">Série terminée ! 🎉</h2>
+        <p class="text-base font-bold text-slate-700">Score global : <span id="final-score" class="text-emerald-600">0</span> / 10</p>
+        <div id="star-rating" class="text-3xl">⭐⭐⭐</div>
+        <button onclick="openDiplomaModal()" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl shadow-lg">
+          Obtenir mon Diplôme 🏆
+        </button>
       </div>
-
     </section>
-  </div>
 
-  <!-- MODAL DIPLÔME -->
-  <div id="diploma-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="diploma-card bg-white rounded-3xl p-8 max-w-2xl w-full border-8 border-indigo-500 shadow-2xl relative text-center space-y-6">
+  </main>
+
+  <!-- Modal Diplôme -->
+  <div id="diploma-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full border-4 border-amber-400 text-center space-y-4 shadow-2xl relative">
+      <div class="text-3xl">📜</div>
+      <h3 class="text-xl font-black text-amber-900">DIPLÔME DE GÉOMÉTRIE</h3>
+      <p class="text-xs text-slate-600">Décerné au champion / à la championne de CE2 :</p>
       
-      <!-- Bouton fermer (masqué à l'impression) -->
-      <button onclick="closeDiplomaModal()" class="no-print absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-2xl font-bold w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center">✕</button>
+      <input type="text" id="student-name" placeholder="Entre ton prénom ici..." class="w-full px-3 py-2 border-2 border-amber-300 rounded-lg text-center font-bold text-sm focus:outline-none focus:border-amber-500">
+      
+      <p class="text-sm font-bold text-indigo-700">Pour avoir réussi les exercices sur les droites et les points alignés !</p>
+      
+      <div id="diploma-stars" class="text-2xl">⭐⭐⭐</div>
 
-      <!-- En-tête du Diplôme -->
-      <div class="space-y-2">
-        <div class="text-5xl">🏆 📐 🌟</div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-indigo-700 uppercase tracking-wider">Diplôme d'Honneur</h2>
-        <p class="text-lg font-bold text-amber-600 uppercase tracking-widest">Expert en Géométrie CE2</p>
+      <div class="flex gap-2 justify-center pt-2">
+        <button onclick="window.print()" class="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-lg text-xs">Imprimer 🖨️</button>
+        <button onclick="closeDiplomaModal(); resetAllGames();" class="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg text-xs">Rejouer 🔄</button>
       </div>
-
-      <div class="h-0.5 bg-indigo-200 w-3/4 mx-auto"></div>
-
-      <!-- Corps du diplôme -->
-      <div class="space-y-4">
-        <p class="text-slate-600 font-medium text-lg">Ce diplôme est décerné officiellement à :</p>
-        
-        <!-- Saisie du prénom -->
-        <div class="no-print max-w-xs mx-auto">
-          <input type="text" id="student-name-input" oninput="updateDiplomaName()" placeholder="Écris ton prénom ici" class="w-full text-center px-4 py-2 border-2 border-indigo-300 rounded-xl font-bold text-xl text-indigo-800 focus:outline-none focus:border-indigo-600">
-        </div>
-        
-        <h3 id="diploma-name" class="text-3xl sm:text-4xl font-extrabold text-indigo-900 underline decoration-indigo-300 decoration-wavy">
-          Champion de CE2
-        </h3>
-
-        <p class="text-slate-700 text-lg max-w-lg mx-auto">
-          Pour avoir réussi avec succès les épreuves sur la reconnaissance des <span class="font-bold text-indigo-600">droites</span> et la détection des <span class="font-bold text-indigo-600">points alignés</span> !
-        </p>
-
-        <!-- Résultats inscrits -->
-        <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 inline-block px-8">
-          <p class="text-sm text-amber-800 font-bold uppercase">Résultat obtenu</p>
-          <p class="text-2xl font-extrabold text-amber-600"><span id="diploma-score">10</span> / 10 Points</p>
-          <div id="diploma-stars" class="text-2xl mt-1">⭐⭐⭐</div>
-        </div>
-      </div>
-
-      <!-- Sceau et Signature -->
-      <div class="flex justify-between items-end pt-4 px-6 text-left">
-        <div class="text-xs text-slate-500 font-bold">
-          <p>École Primaire - CE2</p>
-          <p>Notion : La Droite Géométrique</p>
-        </div>
-        <div class="text-right">
-          <div class="text-2xl font-bold text-indigo-600" style="font-family: cursive;">La Maîtresse / Le Maître</div>
-          <p class="text-xs text-slate-400 font-semibold">Signature officielle</p>
-        </div>
-      </div>
-
-      <!-- Actions de la modal (masquées à l'impression) -->
-      <div class="no-print flex justify-center gap-4 pt-4 border-t border-slate-100">
-        <button onclick="window.print()" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-lg rounded-2xl shadow-lg transition transform hover:-translate-y-0.5 flex items-center gap-2">
-          🛈 Imprimer mon Diplôme
-        </button>
-        <button onclick="closeDiplomaModal()" class="px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-lg rounded-2xl transition">
-          Fermer
-        </button>
-      </div>
-
     </div>
   </div>
 
   <script>
-    // --- GESTION DES ONGLETS ---
+    // --- ONGLETS ---
     function switchTab(tab) {
       document.getElementById('game1').classList.toggle('hidden', tab !== 1);
       document.getElementById('game2').classList.toggle('hidden', tab !== 2);
-      
-      const tab1Btn = document.getElementById('tab1-btn');
-      const tab2Btn = document.getElementById('tab2-btn');
-
-      if (tab === 1) {
-        tab1Btn.className = 'px-6 py-3 rounded-2xl font-bold bg-indigo-600 text-white shadow-lg transition transform hover:-translate-y-0.5';
-        tab2Btn.className = 'px-6 py-3 rounded-2xl font-bold bg-white text-slate-700 hover:bg-slate-100 shadow transition transform hover:-translate-y-0.5';
-      } else {
-        tab1Btn.className = 'px-6 py-3 rounded-2xl font-bold bg-white text-slate-700 hover:bg-slate-100 shadow transition transform hover:-translate-y-0.5';
-        tab2Btn.className = 'px-6 py-3 rounded-2xl font-bold bg-indigo-600 text-white shadow-lg transition transform hover:-translate-y-0.5';
-      }
+      document.getElementById('tab1-btn').className = tab === 1 ? 'px-3 py-1 rounded-lg font-bold text-xs bg-indigo-600 text-white shadow' : 'px-3 py-1 rounded-lg font-bold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200';
+      document.getElementById('tab2-btn').className = tab === 2 ? 'px-3 py-1 rounded-lg font-bold text-xs bg-indigo-600 text-white shadow' : 'px-3 py-1 rounded-lg font-bold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200';
     }
 
-    // --- JEU 1 : EST-CE UNE DROITE ? ---
+    // --- JEU 1 : LOGIQUE ---
     const questionsG1 = [
       { 
-        type: 'droite', 
         isLine: true, 
-        draw: '<line x1="10" y1="75" x2="390" y2="75" stroke="#4f46e5" stroke-width="4"/><circle cx="100" cy="75" r="5" fill="#1e293b"/><text x="95" y="55" font-weight="bold" font-size="16">A</text><circle cx="300" cy="75" r="5" fill="#1e293b"/><text x="295" y="55" font-weight="bold" font-size="16">B</text>' 
+        draw: '<line x1="20" y1="80" x2="380" y2="80" stroke="#4f46e5" stroke-width="4"/><circle cx="100" cy="80" r="4" fill="#1e293b"/><text x="95" y="60" font-weight="bold">A</text><circle cx="300" cy="80" r="4" fill="#1e293b"/><text x="295" y="60" font-weight="bold">B</text>' 
       },
       { 
-        type: 'courbe', 
-        isLine: false, 
-        draw: '<path d="M 20 110 Q 200 10 380 110" stroke="#f43f5e" stroke-width="4" fill="none"/><circle cx="120" cy="65" r="5" fill="#1e293b"/><text x="115" y="45" font-weight="bold" font-size="16">C</text>' 
+        isLine: false, // Segment [CD] avec crochets
+        draw: '<line x1="80" y1="80" x2="320" y2="80" stroke="#4f46e5" stroke-width="4"/><path d="M 85 65 L 75 65 L 75 95 L 85 95" stroke="#4f46e5" stroke-width="3" fill="none"/><path d="M 315 65 L 325 65 L 325 95 L 315 95" stroke="#4f46e5" stroke-width="3" fill="none"/><text x="90" y="55" font-weight="bold">C</text><text x="295" y="55" font-weight="bold">D</text>' 
       },
       { 
-        type: 'segment', 
-        isLine: false, 
-        draw: '<line x1="80" y1="75" x2="320" y2="75" stroke="#4f46e5" stroke-width="4"/><line x1="80" y1="55" x2="80" y2="95" stroke="#4f46e5" stroke-width="4"/><line x1="320" y1="55" x2="320" y2="95" stroke="#4f46e5" stroke-width="4"/><text x="75" y="45" font-weight="bold" font-size="16">E</text><text x="315" y="45" font-weight="bold" font-size="16">F</text>' 
+        isLine: false, // Ligne courbe
+        draw: '<path d="M 30 110 Q 200 10 370 110" stroke="#f43f5e" stroke-width="4" fill="none"/>' 
       },
       { 
-        type: 'brisee', 
-        isLine: false, 
-        draw: '<polyline points="20,120 140,30 260,110 380,30" stroke="#f43f5e" stroke-width="4" fill="none"/>' 
+        isLine: false, // Ligne brisée
+        draw: '<polyline points="30,120 140,40 260,110 370,30" stroke="#f43f5e" stroke-width="4" fill="none"/>' 
       },
       { 
-        type: 'droite_oblique', 
-        isLine: true, 
-        draw: '<line x1="20" y1="135" x2="380" y2="15" stroke="#4f46e5" stroke-width="4"/><circle cx="110" cy="105" r="5" fill="#1e293b"/><text x="95" y="95" font-weight="bold" font-size="16">K</text><circle cx="290" cy="45" r="5" fill="#1e293b"/><text x="275" y="35" font-weight="bold" font-size="16">L</text>' 
+        isLine: true, // Droite oblique
+        draw: '<line x1="30" y1="140" x2="370" y2="20" stroke="#4f46e5" stroke-width="4"/><circle cx="120" cy="108" r="4" fill="#1e293b"/><text x="110" y="95" font-weight="bold">E</text><circle cx="280" cy="52" r="4" fill="#1e293b"/><text x="270" y="40" font-weight="bold">F</text>' 
       }
     ];
 
@@ -341,156 +196,109 @@
     function renderQ1() {
       const q = questionsG1[currentQ1];
       document.getElementById('q1-num').innerText = currentQ1 + 1;
-      document.getElementById('g1-score').innerText = scoreG1;
+      document.getElementById('q1-score').innerText = scoreG1;
       document.getElementById('q1-svg').innerHTML = q.draw;
       document.getElementById('q1-feedback').innerText = '';
-      document.getElementById('q1-buttons').style.pointerEvents = 'auto';
     }
 
     function checkGame1(userAnswer) {
       const q = questionsG1[currentQ1];
       const feedback = document.getElementById('q1-feedback');
-      document.getElementById('q1-buttons').style.pointerEvents = 'none';
 
       if (userAnswer === q.isLine) {
         scoreG1++;
-        document.getElementById('g1-score').innerText = scoreG1;
-        feedback.className = "h-12 font-bold text-xl text-emerald-600 animate-bounce";
+        feedback.className = "h-6 text-center font-bold text-xs text-emerald-600 flex items-center justify-center";
         feedback.innerText = "Bravo ! C'est exact ! 🎉";
       } else {
-        feedback.className = "h-12 font-bold text-xl text-rose-600";
-        feedback.innerText = q.isLine ? "Attention ! Une droite continue sans s'arrêter et est bien droite." : "Non ! Une droite ne courbe pas et n'a pas de crochets fermés.";
+        feedback.className = "h-6 text-center font-bold text-xs text-rose-600 flex items-center justify-center";
+        feedback.innerText = q.isLine ? "Faux : une droite continue sans s'arrêter !" : "Faux : les crochets [ ] indiquent un segment délimité.";
       }
 
       setTimeout(() => {
-        currentQ1++;
-        if (currentQ1 < questionsG1.length) {
+        if (currentQ1 < questionsG1.length - 1) {
+          currentQ1++;
           renderQ1();
         } else {
-          showEndGame1();
+          switchTab(2); // Passage au Jeu 2
         }
-      }, 1600);
+      }, 1500);
     }
 
-    function showEndGame1() {
-      document.getElementById('g1-play-zone').classList.add('hidden');
-      document.getElementById('g1-end-zone').classList.remove('hidden');
-      document.getElementById('g1-final-score').innerText = scoreG1;
-
-      const comment = document.getElementById('g1-comment');
-      if (scoreG1 === 5) comment.innerText = "Sans faute ! Tu es imbattable sur les droites ! 🌟";
-      else if (scoreG1 >= 3) comment.innerText = "Bon travail ! Tu as bien compris la notion de droite ! 👍";
-      else comment.innerText = "N'hésite pas à rejouer pour bien retenir la différence ! 💪";
-    }
-
-    function resetGame1() {
-      currentQ1 = 0;
-      scoreG1 = 0;
-      document.getElementById('g1-play-zone').classList.remove('hidden');
-      document.getElementById('g1-end-zone').classList.add('hidden');
-      renderQ1();
-    }
-
-
-    // --- JEU 2 : POINTS ALIGNÉS & TRACÉ DE LA DROITE EXACTE ---
+    // --- JEU 2 : LOGIQUE POINTS ALIGNÉS DANS LE CADRE ---
     let levelG2 = 1;
     let scoreG2 = 0;
     let currentPoints = [];
     let alignedTriplet = [];
     let selected = [];
-    let exactLineCoords = null;
-    let isAnswered = false;
 
     function generateRandomLevel() {
       selected = [];
-      isAnswered = false;
       document.getElementById('q2-feedback').innerText = '';
-      document.getElementById('btn-check-g2').disabled = false;
-      document.getElementById('btn-check-g2').className = "px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-2xl shadow-lg transition transform active:scale-95 hover:-translate-y-0.5";
+      document.getElementById('btn-validate').disabled = false;
 
-      // Dimensions virtuelles SVG : 400x320
-      const width = 400;
-      const height = 320;
+      // Dimensionnement du cadre viewBox (360x200)
+      const minX = 35, maxX = 325;
+      const minY = 30, maxY = 170;
 
-      // Génération de 2 points aléatoires distants pour fixer la vraie droite
-      const x1 = Math.floor(Math.random() * 120) + 50;
-      const y1 = Math.floor(Math.random() * 180) + 70;
-      
-      const angle = (Math.random() * 140 - 70) * (Math.PI / 180); // angle entre -70° et 70°
-      const dist = Math.floor(Math.random() * 40) + 70;
-
-      const x2 = Math.round(x1 + dist * Math.cos(angle));
-      const y2 = Math.round(y1 + dist * Math.sin(angle));
-      
-      const x3 = Math.round(x1 + 2 * dist * Math.cos(angle));
-      const y3 = Math.round(y1 + 2 * dist * Math.sin(angle));
+      // Génération de 3 points alignés garantis
+      const x1 = Math.floor(Math.random() * 80) + 50;
+      const y1 = Math.floor(Math.random() * 60) + 50;
+      const angle = (Math.random() * 80 - 40) * (Math.PI / 180);
+      const dist = Math.floor(Math.random() * 25) + 65;
 
       const p1 = { id: 'A', x: x1, y: y1 };
-      const p2 = { id: 'B', x: x2, y: y2 };
-      const p3 = { id: 'C', x: x3, y: y3 };
+      const p2 = { id: 'B', x: Math.round(x1 + dist * Math.cos(angle)), y: Math.round(y1 + dist * Math.sin(angle)) };
+      const p3 = { id: 'C', x: Math.round(x1 + 2 * dist * Math.cos(angle)), y: Math.round(y1 + 2 * dist * Math.sin(angle)) };
 
       alignedTriplet = ['A', 'B', 'C'];
 
-      // Calcul de la droite exacte traversant tout le canvas SVG y = ax + b ou x = c
-      if (Math.abs(x2 - x1) < 0.001) {
-        exactLineCoords = { x1: x1, y1: 0, x2: x1, y2: height };
-      } else {
-        const slope = (y2 - y1) / (x2 - x1);
-        const intercept = y1 - slope * x1;
-        
-        // Calcul des intersections aux bords x=0 et x=width
-        exactLineCoords = {
-          x1: -50,
-          y1: slope * (-50) + intercept,
-          x2: width + 50,
-          y2: slope * (width + 50) + intercept
-        };
-      }
-
-      // Génération de points pièges (qui ne sont PAS alignés)
-      const p4 = { id: 'D', x: Math.floor(Math.random() * 300) + 50, y: Math.floor(Math.random() * 220) + 50 };
-      const p5 = { id: 'E', x: Math.floor(Math.random() * 300) + 50, y: Math.floor(Math.random() * 220) + 50 };
-      const p6 = { id: 'F', x: Math.floor(Math.random() * 300) + 50, y: Math.floor(Math.random() * 220) + 50 };
+      // Génération de 3 points pièges distincts
+      const p4 = { id: 'D', x: Math.floor(Math.random() * (maxX - minX)) + minX, y: Math.floor(Math.random() * (maxY - minY)) + minY };
+      const p5 = { id: 'E', x: Math.floor(Math.random() * (maxX - minX)) + minX, y: Math.floor(Math.random() * (maxY - minY)) + minY };
+      const p6 = { id: 'F', x: Math.floor(Math.random() * (maxX - minX)) + minX, y: Math.floor(Math.random() * (maxY - minY)) + minY };
 
       currentPoints = [p1, p2, p3, p4, p5, p6].sort(() => Math.random() - 0.5);
-
       renderQ2();
     }
 
-    function renderQ2(showExactLine = false) {
+    function renderQ2(showSolution = false) {
       const svg = document.getElementById('q2-svg');
-      
-      let lineSvgHtml = '';
-      if (showExactLine && exactLineCoords) {
-        // Affiche la droite exacte qui passe par les points alignés
-        lineSvgHtml = `
-          <line x1="${exactLineCoords.x1}" y1="${exactLineCoords.y1}" 
-                x2="${exactLineCoords.x2}" y2="${exactLineCoords.y2}" 
-                stroke="#10b981" stroke-width="5" stroke-dasharray="8 4" 
-                class="revealed-line" />
-        `;
+      let svgContent = '';
+
+      // Affichage de la ligne solution (passant par A, B, C)
+      if (showSolution) {
+        const pA = currentPoints.find(p => p.id === 'A');
+        const pC = currentPoints.find(p => p.id === 'C');
+        const dx = (pC.x - pA.x) * 1.5;
+        const dy = (pC.y - pA.y) * 1.5;
+        
+        svgContent += `<line x1="${pA.x - dx}" y1="${pA.y - dy}" x2="${pC.x + dx}" y2="${pC.y + dy}" stroke="#10b981" stroke-width="3" stroke-dasharray="5,5"/>`;
       }
 
-      const pointsSvgHtml = currentPoints.map(p => {
+      // Rendu des 6 points
+      svgContent += currentPoints.map(p => {
+        const isSolutionPoint = showSolution && alignedTriplet.includes(p.id);
         const isSelected = selected.includes(p.id);
+        
+        let fillColor = '#94a3b8'; // neutre
+        if (isSelected) fillColor = '#4f46e5'; // sélectionné par l'élève
+        if (showSolution && isSolutionPoint) fillColor = '#10b981'; // solution affichée en vert
+
         return `
           <g cursor="pointer" onclick="togglePoint('${p.id}')">
-            <circle cx="${p.x}" cy="${p.y}" r="18" fill="transparent" />
-            <circle cx="${p.x}" cy="${p.y}" r="8" fill="${isSelected ? '#4f46e5' : '#64748b'}" stroke="#ffffff" stroke-width="2" />
-            <text x="${p.x - 4}" y="${p.y - 14}" font-weight="bold" fill="#1e293b" font-size="15">${p.id}</text>
+            <circle cx="${p.x}" cy="${p.y}" r="12" fill="${fillColor}" stroke="${isSolutionPoint ? '#047857' : '#ffffff'}" stroke-width="2" />
+            <text x="${p.x}" y="${p.y + 4}" font-weight="bold" fill="#ffffff" font-size="11" text-anchor="middle" pointer-events="none">${p.id}</text>
           </g>
         `;
       }).join('');
 
-      svg.innerHTML = lineSvgHtml + pointsSvgHtml;
-
+      svg.innerHTML = svgContent;
       document.getElementById('g2-level').innerText = levelG2;
       document.getElementById('g2-score').innerText = scoreG2;
       document.getElementById('selected-points').innerText = selected.join(', ') || 'Aucun';
     }
 
     function togglePoint(id) {
-      if (isAnswered) return;
       if (selected.includes(id)) {
         selected = selected.filter(p => p !== id);
       } else if (selected.length < 3) {
@@ -500,32 +308,21 @@
     }
 
     function checkGame2() {
-      if (isAnswered) return;
-      if (selected.length !== 3) {
-        const feedback = document.getElementById('q2-feedback');
-        feedback.className = "h-10 font-bold text-lg text-amber-600";
-        feedback.innerText = "Choisis 3 points avant de vérifier ! 👆";
-        return;
-      }
-
-      isAnswered = true;
       const feedback = document.getElementById('q2-feedback');
-      const isCorrect = alignedTriplet.every(p => selected.includes(p));
+      const isCorrect = selected.length === 3 && alignedTriplet.every(p => selected.includes(p));
+      
+      document.getElementById('btn-validate').disabled = true;
 
-      // TRACER LA DROITE EXACTE POUR LA VALIDATION VISUELLE
+      // Afficher la droite solution et surbriller les bons points
       renderQ2(true);
-
-      document.getElementById('btn-check-g2').disabled = true;
-      document.getElementById('btn-check-g2').className = "px-8 py-3 bg-slate-300 text-slate-500 font-bold text-lg rounded-2xl cursor-not-allowed";
 
       if (isCorrect) {
         scoreG2++;
-        document.getElementById('g2-score').innerText = scoreG2;
-        feedback.className = "h-10 font-bold text-xl text-emerald-600 animate-bounce";
-        feedback.innerText = "Super ! La droite passe bien par tes 3 points ! 🌟";
+        feedback.className = "h-6 text-center font-bold text-xs text-emerald-600 flex items-center justify-center";
+        feedback.innerText = "Bravo ! Ces 3 points sont parfaitement alignés ! 🌟";
       } else {
-        feedback.className = "h-10 font-bold text-xl text-rose-600";
-        feedback.innerText = "Regarde la droite verte : les 3 points alignés étaient " + alignedTriplet.join(', ') + " !";
+        feedback.className = "h-6 text-center font-bold text-xs text-rose-600 flex items-center justify-center";
+        feedback.innerText = "Erreur ! Regarde la droite verte : les bons points étaient " + alignedTriplet.join(', ');
       }
 
       setTimeout(() => {
@@ -533,36 +330,26 @@
           levelG2++;
           generateRandomLevel();
         } else {
-          showEndGame2();
+          showEndScreen();
         }
-      }, 2500);
+      }, 2500); // 2.5 secondes pour avoir le temps de bien voir la solution
     }
 
-    function showEndGame2() {
+    function showEndScreen() {
       document.getElementById('g2-play-zone').classList.add('hidden');
       document.getElementById('g2-end-zone').classList.remove('hidden');
-      document.getElementById('g2-final-score').innerText = scoreG2;
-
-      const total = scoreG1 + scoreG2;
-      document.getElementById('total-score').innerText = total;
+      const totalScore = scoreG1 + scoreG2;
+      document.getElementById('final-score').innerText = totalScore;
 
       let stars = '⭐☆☆';
-      if (total >= 9) stars = '⭐⭐⭐';
-      else if (total >= 6) stars = '⭐⭐☆';
+      if (totalScore >= 8) stars = '⭐⭐⭐';
+      else if (totalScore >= 5) stars = '⭐⭐☆';
 
-      document.getElementById('total-stars').innerText = stars;
+      document.getElementById('star-rating').innerText = stars;
+      document.getElementById('diploma-stars').innerText = stars;
     }
 
-    function resetGame2() {
-      levelG2 = 1;
-      scoreG2 = 0;
-      document.getElementById('g2-play-zone').classList.remove('hidden');
-      document.getElementById('g2-end-zone').classList.add('hidden');
-      generateRandomLevel();
-    }
-
-
-    // --- GESTION DE LA RÈGLE INTERACTIVE ---
+    // --- RÈGLE MOBILE ---
     const ruler = document.getElementById('ruler');
     let rulerAngle = 0;
     let isDragging = false, startX, startY, initialLeft, initialTop;
@@ -592,43 +379,33 @@
       ruler.style.transform = `rotate(${rulerAngle}deg)`;
     }
 
-    function resetRuler() {
+    function resetRulerRotation() {
       rulerAngle = 0;
       ruler.style.transform = `rotate(0deg)`;
-      ruler.style.top = '120px';
-      ruler.style.left = '60px';
     }
 
-
-    // --- DIPLÔME POPUP MODAL ---
+    // --- MODAL DIPLÔME ---
     function openDiplomaModal() {
-      const modal = document.getElementById('diploma-modal');
-      const totalScore = scoreG1 + scoreG2;
-      document.getElementById('diploma-score').innerText = totalScore;
-
-      let stars = '⭐☆☆';
-      if (totalScore >= 9) stars = '⭐⭐⭐';
-      else if (totalScore >= 6) stars = '⭐⭐☆';
-
-      document.getElementById('diploma-stars').innerText = stars;
-      modal.classList.remove('hidden');
+      document.getElementById('diploma-modal').classList.remove('hidden');
     }
-
     function closeDiplomaModal() {
       document.getElementById('diploma-modal').classList.add('hidden');
     }
-
-    function updateDiplomaName() {
-      const inputVal = document.getElementById('student-name-input').value.trim();
-      document.getElementById('diploma-name').innerText = inputVal || "Champion de CE2";
+    function resetAllGames() {
+      currentQ1 = 0;
+      scoreG1 = 0;
+      levelG2 = 1;
+      scoreG2 = 0;
+      document.getElementById('g2-play-zone').classList.remove('hidden');
+      document.getElementById('g2-end-zone').classList.add('hidden');
+      switchTab(1);
+      renderQ1();
+      generateRandomLevel();
     }
 
-    // --- INITIALISATION ---
+    // Init
     renderQ1();
     generateRandomLevel();
   </script>
 </body>
 </html>
-```
-
-Une fois le code collé dans ton fichier `index.html` sur GitHub Pages, l'application fonctionnera directement.
